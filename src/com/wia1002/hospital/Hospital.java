@@ -1,21 +1,23 @@
 package com.wia1002.hospital;
 
 public class Hospital {
+    private final String name;
+    private boolean available;
 
-    String name;
-    String address;
-    int capacity;
-
-    public Hospital(String name, String address, int capacity){
+    public Hospital(String name, boolean available) {
         this.name = name;
-        this.address = address;
-        this.capacity = capacity;
-    }
-    public boolean hasCapacity(){
-        return capacity >0;
-    }
-    public String toString(){
-        return name + "|" + address + "| Capacity: " + capacity;
+        this.available = available;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 }

@@ -2,62 +2,79 @@ package com.wia1002.hospital;
 
 public class DijkstraService {
 
-    public static void findNearestAvailable(
-            HospitalGraph g,
-            Hospital[] hospitals,
-            int hospitalCount,
-            String source) {
+    public static void findNearestAvailable(HospitalGraph graph,
+                                            Hospital[] hospitals,
+                                            int hospitalCount,
+                                            String sourceName) {
 
-        int n = g.size;
-        double[]dist = new double[n];
-        boolean[] visited = new boolean[n];
-
-        int src = g.indexOf(source);
-        if(src == -1){
-            System.out.println("Source hospital not found.");
+        int src = indexOfHospital(hospitals, hospitalCount, sourceName);
+        if (src == -1) {
+            System.out.println("Source hospital not found: " + sourceName);
             return;
         }
-        for(int i =0 ; i < n; i++){
-            dist[i] = Double.MAX_VALUE;
-            visited[i] = false;
-        }
-        dist[src] = 0;
 
-        for(int step= 0; step < n; step++){
+        int n = hospitalCount;
+        double[] dist = new double[n];
+        boolean[] vis = new boolean[n];
+
+        for (int i = 0; i < n; i++) dist[i] = Double.POSITIVE_INFINITY;
+        dist[src] = 0.0;
+
+        for (int it = 0; it < n; it++) {
             int u = -1;
-            double min = Double.MAX_VALUE;
+            double best = Double.POSITIVE_INFINITY;
 
-            for(int i = 0; i < n; i++){
-                if(!visited[i] && dist[i] < min){
-                    min = dist[i];
+            for (int i = 0; i < n; i++) {
+                if (!vis[i] && dist[i] < best) {
+                    best = dist[i];
                     u = i;
                 }
             }
 
-            if(u == -1) break;
-            visited[u] = true;
+            if (u == -1) break;
+            vis[u] = true;
 
-            for(int h = 0; h < hospitalCount; h++){
-                if(hospitals[h].name.equals(g.names[u])
-                && hospitals[h].capacity>0){
-                    System.out.println("Nearest hospital:");
-                    System.out.println(hospitals[h]);
-                    System.out.println("Travel time: " + dist[u] + " minutes");
-                    return;
-                }
-            }
-            for(int v = 0; v < n ; v++){
-                if (!visited[v]
-                        && g.weight[u][v] > 0
-                        && dist[u] + g.weight[u][v] < dist[v]) {
-
-                    dist[v] = dist[u] + g.weight[u][v];
+            for (int v = 0; v < n; v++) {
+                double w = graph.getCost(u, v);
+                if (w == Double.POSITIVE_INFINITY) continue;
+                if (dist[u] + w < dist[v]) {
+                    dist[v] = dist[u] + w;
                 }
             }
         }
-        System.out.println("No hospital with available capacity.");
 
+        // find nearest available (excluding source)
+        int ans = -1;
+        double ansDist = Double.POSITIVE_INFINITY;
 
+        for (int i = 0; i < n; i++) {
+            if (i == src) continue;
+            if (hospitals[i] == null) continue;
+            if (!hospitals[i].isAvailable()) continue;
+            if (dist[i] < ansDist) {
+                ansDist = dist[i];
+                ans = i;
+            }
+        }
+
+        if (ans == -1 || ansDist == Double.POSITIVE_INFINITY) {
+            System.out.println("No available hospital reachable from: " + hospitals[src].getName());
+        } else {
+            System.out.println("Nearest available hospital: " + hospitals[ans].getName());
+            System.out.println("Distance: " + ansDist);
+        }
     }
 
+    private static int indexOfHospital(Hospital[] hospitals, int hospitalCount, String name) {
+        if (name == null) return -1;
+        String key = name.trim();
+
+        for (int i = 0; i < hospitalCount; i++) {
+            if (hospitals[i] == null) continue;
+            if (hospitals[i].getName().trim().equalsIgnoreCase(key)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

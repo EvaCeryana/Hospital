@@ -1,0 +1,12 @@
+Hospital Kuala Lumpur,Pusat Perubatan Universiti Malaya,15.0
+Hospital Kuala Lumpur,Prince Court Medical Centre,10.0
+Hospital Kuala Lumpur,Hospital Ampang,20.0
+Hospital Kuala Lumpur,Pantai Hospital KL,18.0
+Pusat Perubatan Universiti Malaya,Hospital Serdang,30.0
+Pusat Perubatan Universiti Malaya,Pantai Hospital KL,5.0
+Hospital Serdang,Hospital Putrajaya,10.0
+Hospital Kuala Lumpur,Hospital Sungai Buloh,35.0
+Hospital Sungai Buloh,Hospital Serdang,60.0
+Hospital Ampang,Prince Court Medical Centre,15.0
+Pusat Perubatan Universiti Malaya,Hospital Sungai Buloh,40.0
+Hospital Putrajaya,Hospital Ampang,25.0

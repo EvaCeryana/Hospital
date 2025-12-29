@@ -1,0 +1,8 @@
+Hospital Kuala Lumpur,Jalan Pahang KL,45
+Pusat Perubatan Universiti Malaya,Lembah Pantai KL,30
+Prince Court Medical Centre,Jalan Kia Peng KL,0
+Hospital Serdang,Kajang Selangor,20
+Hospital Sungai Buloh,Sungai Buloh Selangor,50
+Hospital Putrajaya,Putrajaya,15
+Hospital Ampang,Ampang Selangor,0
+Pantai Hospital KL,Bangsar KL,25

@@ -1,32 +1,41 @@
 package com.wia1002.hospital;
 
 public class HospitalGraph {
+    private final int max;
+    private final double[][] w;
 
-    static final int Max = 50;
+    public HospitalGraph(int max) {
+        this.max = max;
+        this.w = new double[max][max];
 
-    String[] names = new String[Max];
-    double[][] weight = new double[Max][Max];
-    int size = 0;
-
-    public void addHospital (String name){
-        if (indexOf(name)== -1) {
+        // init INF
+        for (int i = 0; i < max; i++) {
+            for (int j = 0; j < max; j++) {
+                w[i][j] = (i == j) ? 0.0 : Double.POSITIVE_INFINITY;
+            }
         }
     }
-    public void addEdge(String a, String b, double w) {
-        addHospital(a);
-        addHospital(b);
 
-        int i = indexOf(a);
-        int j = indexOf(b);
+    public void addEdge(int from, int to, double cost) {
+        if (from < 0 || from >= max || to < 0 || to >= max) {
+            // ✅ 防止 ArrayIndexOutOfBounds
+            return;
+        }
+        if (cost < 0) return;
 
-        weight[i][j] = w;
-        weight[j][i] = w;
+        // undirected graph (ambulance travel both ways)
+        w[from][to] = cost;
+        w[to][from] = cost;
     }
 
-    public int indexOf(String name) {
-        for (int i = 0; i < size; i++) {
-            if (names[i].equals(name)) return i;
+    public double getCost(int from, int to) {
+        if (from < 0 || from >= max || to < 0 || to >= max) {
+            return Double.POSITIVE_INFINITY;
         }
-        return -1;
+        return w[from][to];
+    }
+
+    public int size() {
+        return max;
     }
 }
