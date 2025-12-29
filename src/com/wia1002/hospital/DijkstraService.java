@@ -2,79 +2,114 @@ package com.wia1002.hospital;
 
 public class DijkstraService {
 
-    public static void findNearestAvailable(HospitalGraph graph,
-                                            Hospital[] hospitals,
-                                            int hospitalCount,
-                                            String sourceName) {
-
-        int src = indexOfHospital(hospitals, hospitalCount, sourceName);
+    public static void findNearestAvailable(
+            HospitalGraph graph,
+            Hospital[] hospitals,
+            int hospitalCount,
+            String sourceName
+    ) {
+        int src = graph.indexOf(sourceName);
         if (src == -1) {
-            System.out.println("Source hospital not found: " + sourceName);
+            System.out.println("[ERROR] Source hospital not found in graph: " + sourceName);
+            System.out.println("Tip: copy exact name from hospitals.txt");
             return;
         }
 
-        int n = hospitalCount;
+        int n = graph.getVertexCount();
         double[] dist = new double[n];
-        boolean[] vis = new boolean[n];
+        boolean[] used = new boolean[n];
+        int[] prev = new int[n];
 
-        for (int i = 0; i < n; i++) dist[i] = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < n; i++) {
+            dist[i] = Double.POSITIVE_INFINITY;
+            used[i] = false;
+            prev[i] = -1;
+        }
         dist[src] = 0.0;
 
-        for (int it = 0; it < n; it++) {
+        for (int step = 0; step < n; step++) {
             int u = -1;
             double best = Double.POSITIVE_INFINITY;
 
             for (int i = 0; i < n; i++) {
-                if (!vis[i] && dist[i] < best) {
+                if (!used[i] && dist[i] < best) {
                     best = dist[i];
                     u = i;
                 }
             }
 
             if (u == -1) break;
-            vis[u] = true;
+            used[u] = true;
 
             for (int v = 0; v < n; v++) {
-                double w = graph.getCost(u, v);
+                double w = graph.weight(u, v);
                 if (w == Double.POSITIVE_INFINITY) continue;
-                if (dist[u] + w < dist[v]) {
-                    dist[v] = dist[u] + w;
+
+                double nd = dist[u] + w;
+                if (nd < dist[v]) {
+                    dist[v] = nd;
+                    prev[v] = u;
                 }
             }
         }
 
-        // find nearest available (excluding source)
-        int ans = -1;
-        double ansDist = Double.POSITIVE_INFINITY;
+        int bestIdx = -1;
+        double bestDist = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < n; i++) {
-            if (i == src) continue;
-            if (hospitals[i] == null) continue;
-            if (!hospitals[i].isAvailable()) continue;
-            if (dist[i] < ansDist) {
-                ansDist = dist[i];
-                ans = i;
+            String name = graph.getVertexName(i);
+            Hospital h = findHospitalByName(hospitals, hospitalCount, name);
+            if (h != null && h.hasCapacity()) {
+                if (dist[i] < bestDist) {
+                    bestDist = dist[i];
+                    bestIdx = i;
+                }
             }
         }
 
-        if (ans == -1 || ansDist == Double.POSITIVE_INFINITY) {
-            System.out.println("No available hospital reachable from: " + hospitals[src].getName());
-        } else {
-            System.out.println("Nearest available hospital: " + hospitals[ans].getName());
-            System.out.println("Distance: " + ansDist);
+        if (bestIdx == -1 || bestDist == Double.POSITIVE_INFINITY) {
+            System.out.println("No reachable hospital with available capacity.");
+            return;
         }
+
+        Hospital destHospital = findHospitalByName(hospitals, hospitalCount, graph.getVertexName(bestIdx));
+        System.out.println("\nNearest available hospital: " + destHospital);
+        System.out.println("Total travel time: " + bestDist + " minutes");
+
+        System.out.println("Path:");
+        printPath(graph, prev, src, bestIdx);
+        System.out.println();
     }
 
-    private static int indexOfHospital(Hospital[] hospitals, int hospitalCount, String name) {
-        if (name == null) return -1;
-        String key = name.trim();
-
-        for (int i = 0; i < hospitalCount; i++) {
-            if (hospitals[i] == null) continue;
-            if (hospitals[i].getName().trim().equalsIgnoreCase(key)) {
-                return i;
+    private static Hospital findHospitalByName(Hospital[] hospitals, int count, String name) {
+        if (name == null) return null;
+        for (int i = 0; i < count; i++) {
+            if (hospitals[i] != null && hospitals[i].getName().equalsIgnoreCase(name.trim())) {
+                return hospitals[i];
             }
         }
-        return -1;
+        return null;
+    }
+
+    private static void printPath(HospitalGraph g, int[] prev, int src, int dest) {
+        int[] stack = new int[100];
+        int top = 0;
+
+        int cur = dest;
+        while (cur != -1) {
+            stack[top++] = cur;
+            if (cur == src) break;
+            cur = prev[cur];
+        }
+
+        if (stack[top - 1] != src) {
+            System.out.println("(No path)");
+            return;
+        }
+
+        for (int i = top - 1; i >= 0; i--) {
+            System.out.print(g.getVertexName(stack[i]));
+            if (i != 0) System.out.print(" -> ");
+        }
     }
 }

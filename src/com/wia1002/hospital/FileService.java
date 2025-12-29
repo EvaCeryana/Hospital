@@ -1,95 +1,160 @@
 package com.wia1002.hospital;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+
 public class FileService {
 
-    public static int loadHospitals(String path, Hospital[] hospitals) throws Exception {
-        java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(path));
-        String line;
-        int count = 0;
-
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.length() == 0) continue;
-
-            // allow: name OR name,available
-            String name;
-            boolean available = true;
-
-            String[] parts = line.split(",");
-            if (parts.length == 1) {
-                name = parts[0].trim();
-            } else {
-                name = parts[0].trim();
-                String av = parts[1].trim().toLowerCase();
-                available = av.equals("true") || av.equals("1") || av.equals("yes");
-            }
-
-            if (name.length() == 0) continue;
-
-            if (count >= hospitals.length) break;
-            hospitals[count++] = new Hospital(name, available);
-        }
-
-        br.close();
-        return count;
-    }
-
-    public static void loadGraph(String path, HospitalGraph graph,
-                                 Hospital[] hospitals, int hospitalCount) throws Exception {
-
-        java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(path));
+    public static void loadPatients(String filename, MyQueue<Patient> q) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
         String line;
         int lineNo = 0;
 
         while ((line = br.readLine()) != null) {
             lineNo++;
             line = line.trim();
-            if (line.length() == 0) continue;
+            if (line.isEmpty()) continue;
 
-            // expected: from,to,cost  (cost can be 15.0)
-            String[] parts = line.split(",");
-            if (parts.length < 3) {
-                System.out.println("[WARN] graph line " + lineNo + " bad format, skipped: " + line);
+            String[] p = splitCsv(line);
+            if (p.length != 4) {
+                System.out.println("[WARN] patients line " + lineNo + " invalid: " + line);
                 continue;
             }
 
-            String fromName = parts[0].trim();
-            String toName = parts[1].trim();
-            String costStr = parts[2].trim();
+            String name = p[0];
+            int age = Integer.parseInt(p[1].trim());
+            char gender = p[2].trim().charAt(0);
+            double weight = Double.parseDouble(p[3].trim());
 
-            int from = indexOfHospital(hospitals, hospitalCount, fromName);
-            int to = indexOfHospital(hospitals, hospitalCount, toName);
+            q.add(new Patient(name, age, gender, weight));
+        }
+        br.close();
+    }
 
-            if (from == -1 || to == -1) {
-                System.out.println("[WARN] graph line " + lineNo + " unknown hospital name, skipped: " + line);
+    public static void savePatients(String filename, MyQueue<Patient> q) throws Exception {
+        FileWriter fw = new FileWriter(filename, false);
+
+        MyLinkedList<Patient> list = q.internalList();
+        MyLinkedList.Node<Patient> cur = getHead(list);
+
+        while (cur != null) {
+            fw.write(cur.data.toFileLine());
+            fw.write("\n");
+            cur = cur.next;
+        }
+        fw.close();
+    }
+
+    public static void loadEmergencyPatients(String filename, MyPriorityQueue pq) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        int lineNo = 0;
+
+        while ((line = br.readLine()) != null) {
+            lineNo++;
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] p = splitCsv(line);
+            if (p.length != 5) {
+                System.out.println("[WARN] emergency line " + lineNo + " invalid: " + line);
                 continue;
             }
 
-            double cost;
+            String name = p[0];
+            int age = Integer.parseInt(p[1].trim());
+            char gender = p[2].trim().charAt(0);
+            double weight = Double.parseDouble(p[3].trim());
+            int severity = Integer.parseInt(p[4].trim());
+
+            pq.add(new EmergencyPatient(name, age, gender, weight, severity));
+        }
+        br.close();
+    }
+
+    public static void saveEmergencyPatients(String filename, MyPriorityQueue pq) throws Exception {
+        FileWriter fw = new FileWriter(filename, false);
+
+        MyLinkedList<EmergencyPatient> list = pq.internalList();
+        MyLinkedList.Node<EmergencyPatient> cur = getHead(list);
+
+        while (cur != null) {
+            fw.write(cur.data.toFileLine());
+            fw.write("\n");
+            cur = cur.next;
+        }
+        fw.close();
+    }
+
+    public static int loadHospitals(String filename, Hospital[] hospitals) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        int count = 0;
+        int lineNo = 0;
+
+        while ((line = br.readLine()) != null) {
+            lineNo++;
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] p = splitCsv(line);
+            if (p.length != 3) {
+                System.out.println("[WARN] hospitals line " + lineNo + " invalid: " + line);
+                continue;
+            }
+
+            String name = p[0].trim();
+            String addr = p[1].trim();
+            int cap = Integer.parseInt(p[2].trim());
+
+            hospitals[count++] = new Hospital(name, addr, cap);
+        }
+        br.close();
+        return count;
+    }
+
+    public static void loadGraph(String filename, HospitalGraph graph) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        int lineNo = 0;
+
+        while ((line = br.readLine()) != null) {
+            lineNo++;
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] p = splitCsv(line);
+            if (p.length != 3) {
+                System.out.println("[WARN] graph line " + lineNo + " invalid: " + line);
+                continue;
+            }
+
+            String a = p[0].trim();
+            String b = p[1].trim();
+
+            double t;
             try {
-                cost = Double.parseDouble(costStr);
-            } catch (Exception e) {
+                t = Double.parseDouble(p[2].trim());
+            } catch (Exception ex) {
                 System.out.println("[WARN] graph line " + lineNo + " bad cost, skipped: " + line);
                 continue;
             }
 
-            graph.addEdge(from, to, cost);
+            graph.addEdge(a, b, t);
         }
-
         br.close();
     }
 
-    // ✅ 不用 HashMap：用线性搜索
-    private static int indexOfHospital(Hospital[] hospitals, int hospitalCount, String name) {
-        if (name == null) return -1;
-        String key = name.trim();
 
-        for (int i = 0; i < hospitalCount; i++) {
-            if (hospitals[i] == null) continue;
-            if (hospitals[i].getName().trim().equalsIgnoreCase(key)) {
-                return i;
-            }
-        }
-        return -1;
+    private static String[] splitCsv(String line) {
+        return line.split(",");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> MyLinkedList.Node<T> getHead(MyLinkedList<T> list) throws Exception {
+        java.lang.reflect.Field f = MyLinkedList.class.getDeclaredField("head");
+        f.setAccessible(true);
+        return (MyLinkedList.Node<T>) f.get(list);
     }
 }

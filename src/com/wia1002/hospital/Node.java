@@ -1,13 +1,11 @@
 package com.wia1002.hospital;
 
 public class Node<E> {
-    E data;
-    Node<E> next;
+    public E data;
+    public Node<E> next;
 
-    Node(E data){
+    public Node(E data) {
         this.data = data;
-
+        this.next = null;
     }
-
-
 }

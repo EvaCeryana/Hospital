@@ -2,38 +2,56 @@ package com.wia1002.hospital;
 
 public class EmergencyPriorityQueue {
 
-    private Node<EmergencyPatient> head;
+    private final CustomLinkedList<EmergencyPatient> list;
 
-    public void add(EmergencyPatient p ){
-        Node<EmergencyPatient> n = new Node<>(p);
+    public EmergencyPriorityQueue() {
+        list = new CustomLinkedList<>();
+    }
 
-        if(head == null || p.severity <head.data.severity){
-            n.next = head;
-            head = n;
+    public void add(EmergencyPatient p) {
+
+        if (list.isEmpty()) {
+            list.addFirst(p);
             return;
         }
 
-        Node<EmergencyPatient> cur = head;
-        while(cur.next != null && cur.next.data.severity <= p.severity){
+        if (p.getSeverity() < list.peek().getSeverity()) {
+            list.addFirst(p);
+            return;
+        }
+
+        Node<EmergencyPatient> cur = list.getHead();
+
+        while (cur.next != null &&
+                cur.next.data.getSeverity() <= p.getSeverity()) {
             cur = cur.next;
         }
+
+        Node<EmergencyPatient> n = new Node<>(p);
         n.next = cur.next;
         cur.next = n;
     }
 
-    public EmergencyPatient poll(){
-        if(head == null) return null;
-        EmergencyPatient p = head.data;
-        head = head.next;
-        return p;
+    public EmergencyPatient remove() {
+        return list.removeFirst();
     }
 
-    public void display(){
-        if(head == null){
-            System.out.println("No emergency patients");
+    public EmergencyPatient peek() {
+        return list.peek();
+    }
+
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
+    public void display() {
+        if (list.isEmpty()) {
+            System.out.println("Emergency queue is empty.");
             return;
-        }Node<EmergencyPatient> cur = head;
-        while(cur != null){
+        }
+
+        Node<EmergencyPatient> cur = list.getHead();
+        while (cur != null) {
             System.out.println(cur.data);
             cur = cur.next;
         }
