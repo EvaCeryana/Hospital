@@ -12,7 +12,6 @@ public class HospitalGraph {
         this.vertices = new String[max];
         this.w = new double[max][max];
 
-        // init weights to infinity (0 on diagonal)
         for (int i = 0; i < max; i++) {
             for (int j = 0; j < max; j++) {
                 w[i][j] = (i == j) ? 0.0 : Double.POSITIVE_INFINITY;
@@ -21,16 +20,39 @@ public class HospitalGraph {
         this.vertexCount = 0;
     }
 
-    public int getVertexCount() { return vertexCount; }
+    public int getVertexCount() {
+        return vertexCount;
+    }
 
-    public String getVertexName(int idx) { return vertices[idx]; }
+    public String getVertexName(int idx) {
+        return vertices[idx];
+    }
 
     public int indexOf(String name) {
         if (name == null) return -1;
-        String key = name.trim();
+
+        String key = name.trim().toLowerCase();
+        if (key.isEmpty()) return -1;
+
         for (int i = 0; i < vertexCount; i++) {
-            if (vertices[i].equalsIgnoreCase(key)) return i;
+            String v = vertices[i];
+            if (v == null) continue;
+
+            String vv = v.trim().toLowerCase();
+
+            if (vv.equals(key)) return i;
+
+            if (vv.contains(key)) return i;
+
+            if (key.contains(vv)) return i;
+
+            if (vv.startsWith("hospital ")) {
+                String shortName = vv.substring("hospital ".length()).trim();
+                if (shortName.equals(key)) return i;
+                if (shortName.contains(key)) return i;
+            }
         }
+
         return -1;
     }
 
@@ -49,7 +71,6 @@ public class HospitalGraph {
         int ia = ensureVertex(a);
         int ib = ensureVertex(b);
 
-        // undirected
         if (cost < w[ia][ib]) {
             w[ia][ib] = cost;
             w[ib][ia] = cost;
@@ -58,5 +79,35 @@ public class HospitalGraph {
 
     public double weight(int i, int j) {
         return w[i][j];
+    }
+
+    public String edgesToMultilineString() {
+        if (vertexCount == 0) return "(no graph nodes)";
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+
+        for (int i = 0; i < vertexCount; i++) {
+            for (int j = i + 1; j < vertexCount; j++) {
+                double cost = w[i][j];
+                if (cost != Double.POSITIVE_INFINITY && cost != 0.0) {
+                    sb.append(vertices[i]).append(" <-> ")
+                            .append(vertices[j]).append(" = ")
+                            .append(cost).append(" minutes\n");
+                    count++;
+                }
+            }
+        }
+
+        if (count == 0) return "(no edges)";
+        return sb.toString();
+    }
+
+    public String verticesToMultilineString() {
+        if (vertexCount == 0) return "(no graph nodes)";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < vertexCount; i++) {
+            sb.append(i + 1).append(". ").append(vertices[i]).append("\n");
+        }
+        return sb.toString();
     }
 }

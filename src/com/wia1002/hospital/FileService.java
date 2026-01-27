@@ -36,7 +36,7 @@ public class FileService {
         FileWriter fw = new FileWriter(filename, false);
 
         MyLinkedList<Patient> list = q.internalList();
-        MyLinkedList.Node<Patient> cur = getHead(list);
+        MyLinkedList.Node<Patient> cur = list.headNode();
 
         while (cur != null) {
             fw.write(cur.data.toFileLine());
@@ -77,7 +77,7 @@ public class FileService {
         FileWriter fw = new FileWriter(filename, false);
 
         MyLinkedList<EmergencyPatient> list = pq.internalList();
-        MyLinkedList.Node<EmergencyPatient> cur = getHead(list);
+        MyLinkedList.Node<EmergencyPatient> cur = list.headNode();
 
         while (cur != null) {
             fw.write(cur.data.toFileLine());
@@ -146,15 +146,7 @@ public class FileService {
         br.close();
     }
 
-
     private static String[] splitCsv(String line) {
         return line.split(",");
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> MyLinkedList.Node<T> getHead(MyLinkedList<T> list) throws Exception {
-        java.lang.reflect.Field f = MyLinkedList.class.getDeclaredField("head");
-        f.setAccessible(true);
-        return (MyLinkedList.Node<T>) f.get(list);
     }
 }

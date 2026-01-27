@@ -12,8 +12,17 @@ public class MyLinkedList<E> {
     private Node<E> tail;
     private int size;
 
-    public boolean isEmpty() { return size == 0; }
-    public int size() { return size; }
+    Node<E> headNode() {
+        return head;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public int size() {
+        return size;
+    }
 
     public void addLast(E data) {
         Node<E> n = new Node<>(data);

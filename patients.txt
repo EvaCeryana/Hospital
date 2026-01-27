@@ -1,5 +1,3 @@
-Ahmad bin Ismail,34,M,75.5
-Siti Nurhaliza,28,F,55.2
 Tan Wei Ling,45,F,60.0
 Ravi Chandran,52,M,82.1
 Mohd Zikri,19,M,68.3
@@ -8,3 +6,5 @@ Priya Subramaniam,31,F,58.9
 Nurul Fatihah,22,F,50.5
 Chen Jia Hao,50,M,78.9
 Saravanan Muthu,41,M,85.0
+eva,16,F,60.0
+Tishan,67,M,57.0

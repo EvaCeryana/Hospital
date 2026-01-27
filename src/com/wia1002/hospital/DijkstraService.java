@@ -8,11 +8,19 @@ public class DijkstraService {
             int hospitalCount,
             String sourceName
     ) {
+        String report = findNearestAvailableReport(graph, hospitals, hospitalCount, sourceName);
+        System.out.print(report);
+    }
+
+    public static String findNearestAvailableReport(
+            HospitalGraph graph,
+            Hospital[] hospitals,
+            int hospitalCount,
+            String sourceName
+    ) {
         int src = graph.indexOf(sourceName);
         if (src == -1) {
-            System.out.println("[ERROR] Source hospital not found in graph: " + sourceName);
-            System.out.println("Tip: copy exact name from hospitals.txt");
-            return;
+            return "[ERROR] Source hospital not found: " + sourceName + "\nTip: copy exact name from hospitals.txt\n";
         }
 
         int n = graph.getVertexCount();
@@ -42,10 +50,10 @@ public class DijkstraService {
             used[u] = true;
 
             for (int v = 0; v < n; v++) {
-                double w = graph.weight(u, v);
-                if (w == Double.POSITIVE_INFINITY) continue;
+                double ww = graph.weight(u, v);
+                if (ww == Double.POSITIVE_INFINITY) continue;
 
-                double nd = dist[u] + w;
+                double nd = dist[u] + ww;
                 if (nd < dist[v]) {
                     dist[v] = nd;
                     prev[v] = u;
@@ -57,8 +65,11 @@ public class DijkstraService {
         double bestDist = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < n; i++) {
+            if (i == src) continue;
+
             String name = graph.getVertexName(i);
             Hospital h = findHospitalByName(hospitals, hospitalCount, name);
+
             if (h != null && h.hasCapacity()) {
                 if (dist[i] < bestDist) {
                     bestDist = dist[i];
@@ -68,48 +79,50 @@ public class DijkstraService {
         }
 
         if (bestIdx == -1 || bestDist == Double.POSITIVE_INFINITY) {
-            System.out.println("No reachable hospital with available capacity.");
-            return;
+            return "No reachable hospital with available capacity.\n";
         }
 
         Hospital destHospital = findHospitalByName(hospitals, hospitalCount, graph.getVertexName(bestIdx));
-        System.out.println("\nNearest available hospital: " + destHospital);
-        System.out.println("Total travel time: " + bestDist + " minutes");
 
-        System.out.println("Path:");
-        printPath(graph, prev, src, bestIdx);
-        System.out.println();
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nNearest available hospital: ").append(destHospital).append("\n");
+        sb.append("Total travel time: ").append(bestDist).append(" minutes\n");
+        sb.append("Path: ").append(pathToString(graph, prev, src, bestIdx)).append("\n");
+        return sb.toString();
     }
 
     private static Hospital findHospitalByName(Hospital[] hospitals, int count, String name) {
         if (name == null) return null;
+        String key = name.trim();
+
         for (int i = 0; i < count; i++) {
-            if (hospitals[i] != null && hospitals[i].getName().equalsIgnoreCase(name.trim())) {
-                return hospitals[i];
+            Hospital h = hospitals[i];
+            if (h != null && h.getName() != null && h.getName().trim().equalsIgnoreCase(key)) {
+                return h;
             }
         }
         return null;
     }
 
-    private static void printPath(HospitalGraph g, int[] prev, int src, int dest) {
-        int[] stack = new int[100];
+    private static String pathToString(HospitalGraph g, int[] prev, int src, int dest) {
+        int[] stack = new int[200];
         int top = 0;
 
         int cur = dest;
         while (cur != -1) {
+            if (top >= stack.length) break;
             stack[top++] = cur;
             if (cur == src) break;
             cur = prev[cur];
         }
 
-        if (stack[top - 1] != src) {
-            System.out.println("(No path)");
-            return;
-        }
+        if (top == 0 || stack[top - 1] != src) return "(No path)";
 
+        StringBuilder sb = new StringBuilder();
         for (int i = top - 1; i >= 0; i--) {
-            System.out.print(g.getVertexName(stack[i]));
-            if (i != 0) System.out.print(" -> ");
+            sb.append(g.getVertexName(stack[i]));
+            if (i != 0) sb.append(" -> ");
         }
+        return sb.toString();
     }
 }

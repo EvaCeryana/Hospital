@@ -1,10 +1,10 @@
 Lim Guan Hock,55,M,77.0,1
-Zainal Abidin,70,M,71.3,1
-Fatimah Yusof,65,F,62.0,2
+Eva,56,F,45.0,1
 Harith Roslan,50,M,88.0,2
-Deepa Murugan,29,F,56.7,3
+Fatimah Yusof,65,F,62.0,2
 Kavita Singh,33,F,61.2,3
-Amir Hamzah,42,M,90.1,4
-Wong Mei Lee,18,F,48.0,5
+Deepa Murugan,29,F,56.7,3
 Syed Mukhriz,48,M,79.4,4
+Amir Hamzah,42,M,90.1,4
 Mei Xiu Lan,25,F,53.1,5
+Wong Mei Lee,18,F,48.0,5
